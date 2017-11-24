@@ -14,35 +14,23 @@ public class CategoriaService {
     private CategoriaRepository categoriaRepository;
 
 
+
     public void salvar(Categoria categoria) {
-
         if (categoria.getId() != 0) {
+            Categoria c = buscarPorId(categoria.getId());
 
-            Categoria p = categoriaRepository.findOne(categoria.getId());
-            if (p != null) {
+            if(c != null) {
                 categoriaRepository.save(categoria);
             } else {
-                // lançar exception
+                throw new NotFoundException("Produto não encontrado.");
             }
-
         } else {
 
-            List<Categoria> categorias = categoriaRepository.findByNome(categoria.getNome());
-
-            if (categorias.size() > 0) {
-
-                System.out.println("---------------- EXCEPTION ");
-
-                throw new DuplicatedException("Item já existe");
-            } else {
-
-                System.out.println("---------------- SALVAR ");
-                categoriaRepository.save(categoria);
-            }
-
+            categoriaRepository.save(categoria);
         }
-
-
+//        } else {
+//            throw new DuplicatedException(ExceptionMessageCode.MENSAGEM_DUPLICATED_ERROR);
+//        }
     }
 
     public void deletar(Long id) {

@@ -1,6 +1,7 @@
 package com.pedro.web.domain.produto;
 
 import com.pedro.web.core.exceptions.DuplicatedException;
+import com.pedro.web.core.exceptions.ExceptionMessageCode;
 import com.pedro.web.core.exceptions.NotFoundException;
 import com.pedro.web.domain.produto.Produto;
 import com.pedro.web.domain.categoria.CategoriaRepository;
@@ -16,31 +17,24 @@ public class ProdutoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
-    public void salvar(Produto produto){
+    public void salvar(Produto produto) {
+            if (produto.getId() != 0) {
+                Produto p = buscarPorId(produto.getId());
 
-        if(produto.getId() != 0){
-
-            Produto p = produtoRepository.findOne(produto.getId());
-            if(p != null){
-                produtoRepository.save(produto);
+                if(p != null) {
+                    produtoRepository.save(produto);
+                } else {
+                    throw new NotFoundException("Produto nao encontrado.");
+                }
             } else {
-                // lançar exception
-            }
-        } else {
-            List<Produto> produtos = produtoRepository.findByNome(produto.getNome());
-
-            if(produtos.size() > 0){
-                
-                System.out.println("---------------- EXCEPTION ");
-
-                throw new DuplicatedException("Item já existe");
-            } else {
-
-                System.out.println("---------------- SALVAR ");
+                System.out.println(produto.getId() + "SALVAR SERVICE");
                 produtoRepository.save(produto);
             }
-        }
+//        } else {
+//            throw new DuplicatedException(ExceptionMessageCode.MENSAGEM_DUPLICATED_ERROR);
+//        }
     }
+
 
     public void deletar(long id) {
         Produto produto = produtoRepository.findOne(id);

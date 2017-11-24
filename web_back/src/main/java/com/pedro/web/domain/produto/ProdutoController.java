@@ -8,19 +8,21 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/produto")
 @CrossOrigin(origins = "*")
-public class ProdutoController extends RestAbstractController{
+public class ProdutoController extends RestAbstractController {
 
     @Autowired
     ProdutoService produtoService;
 
-	@GetMapping
-    public ResponseEntity<?> buscarTodos(){
+    @GetMapping
+    public ResponseEntity<?> buscarProdutos() {
+        jsonResponseService.addSuccess(ProdutoMessageCode.PRODUTO_SUCESSO_BUSCAR);
         return jsonResponse(produtoService.buscarTodos());
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<?> buscarPeloId(@PathVariable long id) {
-        if (produtoService.buscarPorId(id) != null) {
+    public ResponseEntity<?> buscarProduto(@PathVariable long id) {
+        Produto produto = produtoService.buscarPorId(id);
+        if (produto != null && produto.getId() != 0) {
             jsonResponseService.addSuccess(ProdutoMessageCode.PRODUTO_SUCESSO_BUSCAR);
             return jsonResponse(produtoService.buscarPorId(id));
         } else {
@@ -29,21 +31,33 @@ public class ProdutoController extends RestAbstractController{
         }
     }
 
-	@PostMapping
-    public ResponseEntity<?> salvar(@RequestBody Produto produto){
-        produtoService.salvar(produto);
-        jsonResponseService.addSuccess(ProdutoMessageCode.PRODUTO_SUCESSO_SALVAR);
-        return jsonResponse();
-    }
+    @PostMapping
+    public ResponseEntity<?> salvarProduto(@RequestBody Produto produto) {
+        System.out.println("salvar");
+        if (produto.getId() == 0) {
+            System.out.println("IFFF");
 
-    @PutMapping()
-    public ResponseEntity<?> alterar(@RequestBody Produto produto) {
-        if (produtoService.buscarPorId(produto.getId()) != null && produto.getId() != 0) {
             produtoService.salvar(produto);
             jsonResponseService.addSuccess(ProdutoMessageCode.PRODUTO_SUCESSO_SALVAR);
             return jsonResponse();
         } else {
+            System.out.println("elseeee");
             jsonResponseService.addError(ProdutoMessageCode.PRODUTO_ERRO_SALVAR);
+            return jsonResponse();
+        }
+    }
+
+    @PutMapping(value= "/{id}")
+    public ResponseEntity<?> alterarProduto(@RequestBody Produto produto, @PathVariable long id) {
+        if (produto.getId() != 0) {
+            System.out.println(produto.getNome());
+            produto.setId(id);
+            produtoService.salvar(produto);
+            jsonResponseService.addSuccess(ProdutoMessageCode.PRODUTO_SUCESSO_ALTERAR);
+            return jsonResponse();
+        } else {
+            System.out.println("ELSE ALTERAR");
+            jsonResponseService.addError(ProdutoMessageCode.PRODUTO_ERRO_ALTERAR);
             return jsonResponse();
         }
     }
@@ -51,15 +65,12 @@ public class ProdutoController extends RestAbstractController{
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<?> deletarProduto(@PathVariable long id) {
         if (produtoService.buscarPorId(id) != null) {
-            System.out.println("DELETAR");
             produtoService.deletar(id);
             jsonResponseService.addSuccess(ProdutoMessageCode.PRODUTO_SUCESSO_EXCLUIR);
             return jsonResponse();
         } else {
-            System.out.println("ERRO AO DELETAR");
             jsonResponseService.addError(ProdutoMessageCode.PRODUTO_ERRO_SALVAR);
             return jsonResponse();
         }
     }
-
 }
